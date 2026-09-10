@@ -1,0 +1,97 @@
+site_name: RAPTOR Docs
+author: Riccardo Minnozzi
+description: Documentation for the RAPTOR (Rapid Algorithm for Pseudospectral Trajectory Optimization and Robustification) solver.
+
+theme:
+  name: material
+  language: en
+  logo: assets/icon_raptor.svg
+  favicon: assets/icon_raptor.svg
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - navigation.tracking
+    - search.highlight
+    - search.suggest
+    - toc.follow
+    - content.code.copy
+
+extra_css:
+  - stylesheets/extra.css
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+
+nav:
+  - Home: index.md
+  - Getting Started:
+      - Installation: getting-started/installation.md
+      - Quickstart: getting-started/quickstart.md
+      - Concepts and Conventions: getting-started/concepts.md
+      - Third-Party Integrations: getting-started/third-party-integrations.md
+
+  - Defining Your Problem:
+      - Overview: problem-definition/overview.md
+      - Elements:
+          - Problem: problem-definition/elements/problem.md
+          - Phase: problem-definition/elements/phase.md
+          - Box Constraints: problem-definition/elements/box-constraints.md
+          - Boundary Conditions: problem-definition/elements/boundary-conditions.md
+          - Initial Guess: problem-definition/elements/initial-guess.md
+          - Dynamics: problem-definition/elements/dynamics.md
+          - Constraints: 
+            - Constraints: problem-definition/elements/constraints.md
+            - Path Constraints: problem-definition/elements/path-constraints.md
+            - Differential Constraints: problem-definition/elements/differential-constraints.md
+            - Boundary Constraints: problem-definition/elements/boundary-constraints.md
+          - Cost Function: problem-definition/elements/cost-function.md
+          - Collocation: problem-definition/elements/collocation.md
+          - Linkage Conditions: problem-definition/elements/linkage-conditions.md
+
+  - Configuring your Solver:
+      - Configuring Your Solver: solver-configuration/configuring-your-solver.md
+      - Scaling: solver-configuration/scaling.md
+      - Numerical Differentiation: solver-configuration/numerical-differentiation.md
+      - NLP Solver: solver-configuration/nlp-solver.md
+      - Post-Processing: solver-configuration/post-processing.md
+
+  - Analyzing Results:
+      - Solution: analyzing-results/solution.md
+      - Visualization: analyzing-results/visualization.md
+      - Debugging: analyzing-results/debugging.md
+
+  - Examples: examples/examples.md
+
+  - API Reference:
+      - Overview: api-reference/overview.md
+      - Problem and Phase: api-reference/problem-and-phase.md
+      - Functions and Constraints: api-reference/functions-and-constraints.md
+      - Configuration: api-reference/configuration.md
+      - Build, Solve, and Results: api-reference/build-solve-results.md
+
+plugins:
+  - search
+
+copyright: Copyright &copy; 2026 RAPTOR

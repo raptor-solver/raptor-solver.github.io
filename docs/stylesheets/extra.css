@@ -1,0 +1,80 @@
+:root {
+  --md-primary-fg-color: #0f2747;
+  --md-primary-fg-color--light: #173b68;
+  --md-primary-fg-color--dark: #091a30;
+  --md-accent-fg-color: #0891b2;
+  --raptor-highlight: #f59e0b;
+}
+
+[data-md-color-scheme="slate"] {
+  --md-primary-fg-color: #0b1f38;
+  --md-accent-fg-color: #67e8f9;
+  --md-typeset-a-color: #7dd3fc;
+  --md-default-bg-color: #0d1726;
+  --md-code-bg-color: #111f32;
+}
+
+.md-header,
+.md-tabs {
+  background: linear-gradient(110deg, var(--md-primary-fg-color--dark), var(--md-primary-fg-color));
+}
+
+.md-logo img,
+.md-logo svg {
+  width: auto;
+  height: clamp(1.9rem, 2vw, 2.15rem);
+}
+
+.md-typeset h1 {
+  color: var(--md-primary-fg-color);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+[data-md-color-scheme="slate"] .md-typeset h1 {
+  color: #f1f5f9;
+}
+
+.md-typeset a {
+  text-underline-offset: 0.15em;
+}
+
+[data-md-color-scheme="slate"] .md-typeset a {
+  color: var(--md-typeset-a-color);
+}
+
+[data-md-color-scheme="slate"] .md-typeset a:hover,
+[data-md-color-scheme="slate"] .md-typeset a:focus {
+  color: #a5f3fc;
+}
+
+.md-typeset code {
+  border-radius: 0.3rem;
+}
+
+.md-nav__link--active,
+.md-tabs__link--active {
+  font-weight: 700;
+}
+
+[data-md-color-scheme="slate"] .md-nav__link--active,
+[data-md-color-scheme="slate"] .md-tabs__link--active {
+  color: var(--md-accent-fg-color);
+}
+
+.md-tabs__link--active {
+  color: var(--raptor-highlight);
+}
+
+@media screen and (min-width: 76.25em) {
+  .md-grid {
+    max-width: 88rem;
+  }
+}
+
+@media screen and (max-width: 44.984375em) {
+  .md-logo img,
+  .md-logo svg {
+    height: 1.9rem;
+  }
+}
