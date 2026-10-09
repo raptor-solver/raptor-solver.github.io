@@ -1,82 +1,100 @@
 # Installation
 
+RAPTOR is written in MATLAB and does not need to be compiled. To install it,
+download the repository, add it to the MATLAB path, and run an example to
+check that the included IPOPT solver works on your system.
+
 ## Requirements
 
-RAPTOR requires MATLAB R2023 or newer. The 0.1.0 manual reports successful testing with R2023b, R2025b, and R2026a; compatibility with other releases is not guaranteed.
+| | |
+| --- | --- |
+| **MATLAB** | R2023b or newer. Tested on R2023b, R2025b and R2026a. |
+| **Platform** | Windows or Linux (64 bit). On macOS, the IPOPT mex file must be built first, see [NLP Solvers](../user-guide/nlp-solvers.md#ipopt). |
+| **NLP solver** | IPOPT is included (through `mexIPOPT`) and used by default. SNOPT and WORHP can be used if you install them and have a licence, see [NLP Solvers](../user-guide/nlp-solvers.md). |
 
-At least one supported nonlinear-programming solver is also required:
+## Install
 
-- **IPOPT** is bundled through the `mexIPOPT` interface and is the default backend.
-- **SNOPT** is supported but must be installed and licensed separately.
-- **WORHP** is supported but must be installed and licensed separately.
+<div class="rp-steps" markdown>
 
-See [Third-Party Integrations](third-party-integrations.md) before selecting SNOPT or WORHP.
+1. **Download RAPTOR.** Clone the repository, or download and extract a
+   release archive, into a folder where you have write access.
 
-## Add RAPTOR to MATLAB
+    ```bash
+    git clone https://github.com/raptor-solver/raptor-matlab.git
+    ```
 
-Clone or download RAPTOR into a directory where you have write permission. From MATLAB, change to the repository root and run:
+2. **Add RAPTOR to the MATLAB path.** In MATLAB, go to the repository root
+   folder and run:
 
-```matlab
-cd("C:\path\to\raptor")
-RAPTOR_init();
-```
+    ```matlab
+    cd("path/to/raptor-matlab")
+    RAPTOR_init();
+    ```
 
-`RAPTOR_init` adds `src`, `third_party`, and `utils`, including their subdirectories, to the current MATLAB path. The change applies to the current session. Run the function again after restarting MATLAB, or save the path explicitly if that is appropriate for your installation:
+    `RAPTOR_init` adds the `src`, `third_party` and `utils` folders and their
+    subfolders to the path for the current session.
 
-```matlab
-savepath;
-```
+3. **Save the path (optional).** To avoid running `RAPTOR_init` after every
+   MATLAB restart, save the path:
+
+    ```matlab
+    savepath;
+    ```
+
+</div>
 
 !!! note
-    Run `RAPTOR_init` from the repository root. The initialization function builds its paths from MATLAB's current working directory.
+    Run `RAPTOR_init` from the repository root folder. It builds the paths
+    from the current folder.
 
 ## Verify the installation
 
-The double-integrator example uses the bundled IPOPT interface and is the smallest practical check:
+Run the double integrator example. It only uses the included IPOPT solver.
 
 ```matlab
-cd("C:\path\to\raptor")
 RAPTOR_init();
-cd(fullfile("examples", "00-doubleInt"))
+cd(fullfile("examples", "00-doubleIntegrator"))
 showPlots = false;
 main;
 ```
 
-A successful run builds the problem, starts IPOPT, and returns `sol` in the workspace. Inspect:
+IPOPT prints its iteration log, and the solution is stored in `sol`:
 
 ```matlab
-sol.exitStatus
+sol.exitStatus   % true if the solver reports success
 sol.objective
-sol.single.discretized.states
 ```
 
-`exitStatus == true` means the adapter recognized the solver termination as successful. It does not by itself establish continuous-time accuracy; inspect the validation results as described in [Solution and Validation](../analyzing-results/solution.md).
-
-To exercise the supplied examples as a collection, run from the repository root:
+To run all the examples:
 
 ```matlab
 cd tests
 run_all_examples();
 ```
 
-Some examples can depend on an external solver or license. Investigate each failure individually and rerun that example with its complete command-window output visible.
+Some examples may need an external solver or licence. If an example fails,
+run it on its own to see the complete output.
 
-## Common installation problems
+## Common problems
 
-**`RAPTOR_init` is undefined**
+??? question "`RAPTOR_init` is undefined"
+    MATLAB is not in the repository root folder. Use `cd` to go there first.
 
-: MATLAB is not in the repository root and the root itself is not on the path. Change to the root directory first.
+??? question "A `raptor.*` class or function is undefined"
+    Run `RAPTOR_init` again, then check which installation MATLAB uses with
+    `which raptor.build`.
 
-**A `raptor.*` class or function is undefined**
+??? question "The problem builds but the solver function is missing"
+    RAPTOR is on the path but the selected NLP solver is not. Select
+    `"Ipopt"`, or complete the setup described in
+    [NLP Solvers](../user-guide/nlp-solvers.md).
 
-: Rerun `RAPTOR_init`, then use `which raptor.build` to confirm which installation MATLAB sees.
+??? question "A MEX file cannot be loaded"
+    Check that the included binary matches your operating system and
+    architecture, and that its runtime libraries are available. Include the
+    full error message when asking for help.
 
-**The problem builds but the solver function is missing**
+When you report an installation problem, include the RAPTOR version, MATLAB
+release, operating system, selected solver, and the complete error message.
 
-: The RAPTOR source is available, but the selected NLP backend is not correctly installed or on the MATLAB path. Select the bundled IPOPT interface or complete the external solver setup.
-
-**A MEX-file cannot be loaded**
-
-: Confirm that the bundled binary matches the operating system and architecture, and that its native runtime dependencies are available. Preserve the complete loader error when requesting support.
-
-When reporting an installation issue, include the RAPTOR version, MATLAB release, operating system and architecture, selected solver and version, and the full error message.
+[Next: Quickstart :material-arrow-right:](quickstart.md){ .md-button .md-button--primary }

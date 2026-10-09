@@ -1,3 +1,8 @@
+# ---> Local tooling (AI assistants, editors)
+.continue/
+.agents/
+.claude/
+
 # ---> MATLAB
 # Windows default autosave extension
 *.asv

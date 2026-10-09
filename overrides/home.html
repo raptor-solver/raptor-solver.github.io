@@ -1,0 +1,91 @@
+{% extends "main.html" %}
+
+{#
+  Landing page template. The hero sits outside the content grid so it can
+  span the full viewport width; the rest of the home page is written in
+  docs/index.md.
+#}
+
+{% block tabs %}
+  {{ super() }}
+  <section class="rp-hero" aria-labelledby="rp-hero-title">
+    <div class="rp-hero__sky" aria-hidden="true"></div>
+
+    <!-- Decorative trajectory: the dots are spaced like Gauss-Lobatto
+         collocation nodes, clustering towards both ends of the arc. -->
+    <svg class="rp-hero__trajectory" viewBox="0 0 1200 400" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <defs>
+        <linearGradient id="rp-arc-gradient" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#8eb3d6" stop-opacity="0" />
+          <stop offset="0.35" stop-color="#8eb3d6" stop-opacity="0.55" />
+          <stop offset="1" stop-color="#ff9c43" stop-opacity="0.95" />
+        </linearGradient>
+        <radialGradient id="rp-craft-glow">
+          <stop offset="0" stop-color="#ffd9a8" stop-opacity="1" />
+          <stop offset="0.4" stop-color="#ff9c43" stop-opacity="0.6" />
+          <stop offset="1" stop-color="#ff9c43" stop-opacity="0" />
+        </radialGradient>
+      </defs>
+      <path id="rp-arc" class="rp-hero__arc" d="M -20 360 C 380 380, 700 30, 1220 90" stroke="url(#rp-arc-gradient)" />
+      <g class="rp-hero__nodes">
+        <circle cx="38.9" cy="360.3" r="3" />
+        <circle cx="108.4" cy="354.3" r="3" />
+        <circle cx="199.3" cy="337.2" r="3" />
+        <circle cx="306.8" cy="305.7" r="3" />
+        <circle cx="426.7" cy="261.4" r="3" />
+        <circle cx="555.0" cy="210.0" r="3" />
+        <circle cx="687.8" cy="160.1" r="3" />
+        <circle cx="820.2" cy="119.9" r="3" />
+        <circle cx="945.7" cy="94.5" r="3" />
+        <circle cx="1056.6" cy="84.0" r="3" />
+        <circle cx="1144.2" cy="84.0" r="3" />
+      </g>
+      <g class="rp-hero__craft">
+        <circle r="16" fill="url(#rp-craft-glow)" />
+        <circle r="3.5" fill="#fff4e6" />
+        <animateMotion dur="9s" repeatCount="indefinite" rotate="auto" keyPoints="0;1" keyTimes="0;1" calcMode="spline" keySplines="0.45 0 0.55 1">
+          <mpath href="#rp-arc" />
+        </animateMotion>
+      </g>
+    </svg>
+
+    <div class="rp-hero__inner md-grid">
+      <div class="rp-hero__copy">
+        <p class="rp-hero__kicker">ARGOS Laboratory &middot; University of Bologna</p>
+        <h1 id="rp-hero-title" class="rp-hero__title">RAPTOR</h1>
+        <p class="rp-hero__expansion">
+          <b>R</b>apid <b>A</b>lgorithm for <b>P</b>seudospectral
+          <b>T</b>rajectory <b>O</b>ptimization and <b>R</b>obustification
+        </p>
+        <p class="rp-hero__lede">
+          A MATLAB toolbox for solving optimal control problems with
+          pseudospectral methods. Problems are defined with an object-oriented
+          interface and solved with IPOPT, SNOPT or WORHP.
+        </p>
+        <div class="rp-hero__actions">
+          <a class="md-button md-button--primary" href="{{ 'getting-started/installation/' | url }}">Installation</a>
+          <a class="md-button" href="{{ 'getting-started/quickstart/' | url }}">Quickstart</a>
+          <a class="md-button rp-hero__ghost" href="{{ config.repo_url }}">
+            <span class="twemoji">{% include ".icons/fontawesome/brands/github.svg" %}</span>
+            GitHub
+          </a>
+        </div>
+        <ul class="rp-hero__chips" aria-label="At a glance">
+          <li>MATLAB R2023b or newer</li>
+          <li>IPOPT included</li>
+          <li>MIT License</li>
+          <li>Version 0.1 (early release)</li>
+        </ul>
+      </div>
+      <div class="rp-hero__badge" aria-hidden="true">
+        <img src="{{ 'assets/logo_raptor.svg' | url }}" alt="" width="320" height="326" />
+      </div>
+    </div>
+  </section>
+{% endblock %}
+
+{% block content %}
+  <div class="rp-home">
+    {{ page.content }}
+  </div>
+{% endblock %}

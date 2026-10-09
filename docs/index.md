@@ -1,49 +1,334 @@
-# RAPTOR
+---
+title: Home
+template: home.html
+hide:
+  - navigation
+  - toc
+---
 
-**R**apid **A**lgorithm for **P**seudospectral **T**rajectory **O**ptimization and **R**obustification is an object-oriented MATLAB toolbox for transcribing and solving continuous-time optimal-control problems with pseudospectral methods.
+<section class="rp-section" markdown>
 
-RAPTOR separates the continuous problem definition from the numerical choices used to solve it. You describe phases, variables, dynamics, constraints, objectives, bounds, and an initial guess; RAPTOR then builds a nonlinear program, calls a supported NLP solver, and reconstructs primal, dual, and validation results.
+<div class="rp-section__head" markdown>
+<span class="rp-eyebrow">Overview</span>
 
-!!! warning "Version and stability"
-    This documentation describes the MATLAB interface distributed with RAPTOR user manual **0.1.0 (June 2026)**. RAPTOR is under active development, so check the release you are using before reusing a formulation created for another version.
+## How RAPTOR works
 
-## Where to begin
+You define the optimal control problem in MATLAB. RAPTOR discretizes it with
+a pseudospectral method, solves the resulting nonlinear program (NLP), and
+checks the solution by integrating the dynamics with the optimal controls.
+</div>
 
-- New users should complete [Installation](getting-started/installation.md) and then follow the [Quickstart](getting-started/quickstart.md).
-- To translate a mathematical problem into RAPTOR objects, start with [Defining Your Problem](problem-definition/overview.md).
-- To tune differentiation, scaling, transcription, and the NLP backend, see [Configuring Your Solver](solver-configuration/configuring-your-solver.md).
-- To inspect convergence and continuous-time accuracy, see [Analyzing Results](analyzing-results/solution.md).
-- When you know the operation you need and want its exact contract, use the [API Reference](api-reference/overview.md).
+<div class="rp-pipeline" markdown>
 
-## The RAPTOR workflow
+<div class="rp-pipeline__card" markdown>
+<span class="rp-eyebrow">1 · Problem</span>
 
-1. Write the continuous formulation and choose the state, control, and parameter ordering.
-2. Create a `raptor.api.v1.OptimalControlProblem` and add one or more phases.
-3. Define functions, bounds, boundary values, an initial guess, and a collocation grid.
-4. Call `raptor.build` to validate and freeze the formulation into a solver object.
-5. Configure transcription, scaling, differentiation, the NLP solver, validation, and plotting.
-6. Call `problem.solve()` and check both the solver status and the independently propagated trajectory.
+\[
+\begin{aligned}
+\min\;& \Phi(x_0, x_f) + \textstyle\int_{t_0}^{t_f} L\,\mathrm{d}t \\
+\text{s.t.}\;& \dot{x} = f(x, u, t) \\
+& g(x, u, t) \le 0 \\
+& \psi(x_0, x_f) = 0
+\end{aligned}
+\]
 
-```matlab
-ocp = raptor.api.v1.OptimalControlProblem("myProblem", auxdata, 0);
-phase = ocp.addPhase("flight", nStates, nControls, 0);
+\(x\): states, \(u\): controls, \(x_0, x_f\): initial and final states,
+\(\Phi\): endpoint cost, \(L\): running cost, \(f\): dynamics,
+\(g\): path constraints, \(\psi\): boundary conditions.
+{ .rp-note }
 
-% Define the phase here.
+</div>
 
-problem = raptor.build(ocp);
-problem.config.solver.method = "Ipopt";
-solution = problem.solve();
+<div class="rp-pipeline__arrow" aria-hidden="true"></div>
+
+<div class="rp-pipeline__card rp-pipeline__card--core" markdown>
+<span class="rp-eyebrow">2 · Discretization and solution</span>
+<p class="rp-pipeline__name">RAPTOR</p>
+<ul class="rp-pipeline__stages">
+  <li><span>Discretize</span><span>Lagrange or Birkhoff collocation</span></li>
+  <li><span>Differentiate</span><span>sparse finite differences</span></li>
+  <li><span>Scale</span><span>bounds- and Jacobian-based</span></li>
+  <li><span>Solve</span><span>IPOPT, SNOPT or WORHP</span></li>
+</ul>
+</div>
+
+<div class="rp-pipeline__arrow" aria-hidden="true"></div>
+
+<div class="rp-pipeline__card" markdown>
+<span class="rp-eyebrow">3 · Verification</span>
+<svg class="rp-mini-plot" viewBox="0 0 260 132" role="img" aria-label="Sketch of the solution at the collocation nodes compared with the integrated dynamics">
+  <line class="axis" x1="20" y1="120" x2="250" y2="120" />
+  <line class="axis" x1="20" y1="120" x2="20" y2="12" />
+  <path class="propagated" d="M 24 112 C 90 118, 150 20, 236 34" />
+  <circle class="node" cx="24" cy="112" r="3.6" />
+  <circle class="node" cx="31.5" cy="112.2" r="3.6" />
+  <circle class="node" cx="52.7" cy="108.6" r="3.6" />
+  <circle class="node" cx="84.3" cy="94.2" r="3.6" />
+  <circle class="node" cx="122.5" cy="70" r="3.6" />
+  <circle class="node" cx="162.9" cy="46.7" r="3.6" />
+  <circle class="node" cx="199.8" cy="34.4" r="3.6" />
+  <circle class="node" cx="226.3" cy="32.9" r="3.6" />
+  <circle class="node" cx="236" cy="34" r="3.6" />
+  <text x="246" y="131" text-anchor="end">t</text>
+</svg>
+<div class="rp-legend"><span>solution at the nodes</span><span>integrated dynamics</span></div>
+</div>
+
+</div>
+</section>
+
+<section class="rp-section" markdown>
+
+<div class="rp-section__head" markdown>
+<span class="rp-eyebrow">Results</span>
+
+## Example results
+
+Two of the examples, animated by their own plotting functions.
+</div>
+
+<div class="rp-media">
+  <figure>
+    <video src="assets/examples/14-rocketAscent.mp4" poster="assets/examples/14-rocketAscent.png" autoplay loop muted playsinline controls></video>
+    <figcaption><a href="examples/#vehicle-problems">Rocket ascent</a>: minimum-time first-stage ascent with dynamic pressure limits.</figcaption>
+  </figure>
+  <figure>
+    <video src="assets/examples/13-hypersonicEntry.mp4" poster="assets/examples/13-hypersonicEntry.png" autoplay loop muted playsinline controls></video>
+    <figcaption><a href="examples/#vehicle-problems">Hypersonic entry</a>: minimum final velocity with heat flux, dynamic pressure and load limits.</figcaption>
+  </figure>
+</div>
+
+</section>
+
+<section class="rp-band" markdown>
+<div class="rp-split" markdown>
+
+<div markdown>
+<span class="rp-eyebrow">Example</span>
+
+## Defining a problem
+
+A problem consists of one or more phases. For each phase you provide the
+dynamics, cost, constraints, bounds and initial guess. Dynamics, costs and
+constraints are ordinary MATLAB functions, evaluated at many time instants at
+once ([vectorized](getting-started/vectorized-functions.md)).
+
+The code shown is the complete double integrator from
+`examples/00-doubleIntegrator`. The [Quickstart](getting-started/quickstart.md)
+explains it line by line.
+
+[Quickstart :material-arrow-right:](getting-started/quickstart.md){ .md-button .md-button--primary }
+</div>
+
+<div class="rp-window" markdown>
+
+=== "main.m"
+
+    ```matlab
+    ocp = raptor.api.v1.OptimalControlProblem("doubleIntegrator", auxdata, 0);
+    phase = ocp.addPhase("single", 6, 3, 0);  % 6 states, 3 controls
+
+    f = phase.dynamics.add(@double_integrator);
+    f.functionType = "linear";
+    phase.costs.lagrange.add(@control_effort_cost);
+
+    phase.boundaryConditions.initial.time   = 0;
+    phase.boundaryConditions.final.time     = 11;
+    phase.boundaryConditions.initial.states = [auxdata.r0; auxdata.v0];
+    phase.boundaryConditions.final.states   = [auxdata.rf; auxdata.vf];
+
+    phase.initialGuess.continuous.controls = [0 0 0]';
+    phase.initialGuess.linear();
+
+    phase.collocation.nodes  = "Gauss-Radau";
+    phase.collocation.nNodes = 24;
+
+    problem = raptor.build(ocp);
+    problem.config.solver.method = "Ipopt";
+    sol = problem.solve();
+    ```
+
+=== "double_integrator.m"
+
+    ```matlab
+    function xdot = double_integrator(inputData)
+    % rows are state components, columns are time instants
+    m = inputData.auxdata.mass;
+    xdot = [inputData.states(4:6, :);
+            inputData.controls(1:3, :) ./ m];
+    end
+    ```
+
+=== "control_effort_cost.m"
+
+    ```matlab
+    function L = control_effort_cost(inputData)
+    % scalar running cost, returned as a 1-by-N row
+    w = inputData.auxdata.control_weight;
+    L = w * sum(inputData.controls(1:3, :).^2, 1);
+    end
+    ```
+
+</div>
+
+</div>
+</section>
+
+<section class="rp-section" markdown>
+
+<div class="rp-section__head" markdown>
+<span class="rp-eyebrow">Features</span>
+
+## Features
+</div>
+
+<div class="rp-cards rp-cards--3" markdown>
+
+<div class="rp-card" markdown>
+:material-vector-polyline: Multi-phase problems
+{ .rp-card__title }
+
+Mayer and Lagrange costs; path, differential, boundary and linkage
+constraints.
+</div>
+
+<div class="rp-card" markdown>
+:material-chart-bell-curve-cumulative: Pseudospectral methods
+{ .rp-card__title }
+
+Lagrange and Birkhoff formulations with Legendre or Chebyshev polynomials,
+Gauss-Radau or Gauss-Lobatto nodes, on a single segment or an hp grid.
+</div>
+
+<div class="rp-card" markdown>
+:material-matrix: Numerical derivatives
+{ .rp-card__title }
+
+Central, complex-step or dual-step differences. Sparsity patterns are
+detected automatically.
+</div>
+
+<div class="rp-card" markdown>
+:material-tune-variant: Scaling
+{ .rp-card__title }
+
+Bounds projection, Ruiz equilibration, Jacobian row normalization and
+manual scaling. Methods can be combined.
+</div>
+
+<div class="rp-card" markdown>
+:material-swap-horizontal: NLP solvers
+{ .rp-card__title }
+
+IPOPT is included. Interfaces to SNOPT and WORHP are available if you
+have a licence for them.
+</div>
+
+<div class="rp-card" markdown>
+:material-check-decagram: Solution checks
+{ .rp-card__title }
+
+Costates and Hamiltonian estimates, and integration of the dynamics to
+check the accuracy of each solution.
+</div>
+
+</div>
+</section>
+
+<section class="rp-band" markdown>
+
+<div class="rp-section__head" markdown>
+<span class="rp-eyebrow">Examples</span>
+
+## Examples
+
+The repository includes 16 example problems, ordered by difficulty. Each
+example introduces a few new features.
+</div>
+
+<div class="rp-ladder" markdown>
+
+<div class="rp-card rp-card--link" markdown>
+<span class="rp-level">00 – 05</span>
+
+[:material-school-outline: Introductory problems](examples.md#introductory-problems)
+{ .rp-card__title }
+
+- Double integrator
+- 1D landing
+- Breakwell
+- Brachistochrone
+- Zermelo
+- Gong
+
+</div>
+
+<div class="rp-card rp-card--link" markdown>
+<span class="rp-level">06 – 08</span>
+
+[:material-orbit: Classical aerospace problems](examples.md#classical-aerospace-problems)
+{ .rp-card__title }
+
+- Goddard rocket
+- Orbit raising
+- RLV return to launch site
+
+</div>
+
+<div class="rp-card rp-card--link" markdown>
+<span class="rp-level">09 – 15</span>
+
+[:material-rocket-launch-outline: Vehicle problems](examples.md#vehicle-problems)
+{ .rp-card__title }
+
+- 3-DoF Mars landing
+- Windy landing
+- Shuttle reentry
+- Shuttle minimum heating
+- Hypersonic entry
+- Rocket ascent
+- 6-DoF Mars landing
+
+</div>
+
+</div>
+</section>
+
+<section class="rp-section" markdown>
+<div class="rp-cite" markdown>
+
+<div markdown>
+<span class="rp-eyebrow">Citing</span>
+
+## Citing RAPTOR
+
+If you use RAPTOR in published work, please cite the paper describing it.
+The paper will be available on arXiv soon; the reference will be updated
+then.
+
+[Citation details :material-arrow-right:](citing.md){ .md-button }
+</div>
+
+```bibtex
+@misc{raptor,
+  author        = {Minnozzi, Riccardo and Sagliano, Marco},
+  title         = {Theoretical and Computational Advances in Birkhoff Pseudospectral Transcription for Aerospace Optimal Control},
+  year          = {2026},
+  eprint        = {XXXX.XXXXX},
+  archivePrefix = {arXiv}
+}
 ```
 
-## What RAPTOR provides
+</div>
+</section>
 
-- A phase-based problem-definition API suitable for single- and multi-phase problems.
-- Mayer and Lagrange objective terms.
-- Path, boundary, differential, and linkage constraints.
-- Lagrange and Birkhoff pseudospectral formulations with several node families.
-- Numerical Jacobians using central, complex-step, or dual-step differences.
-- Composable scaling methods.
-- Interfaces for IPOPT, SNOPT, and WORHP.
-- Automatic primal, dual, and numerical-validation postprocessing.
+<section class="rp-band rp-cta" markdown>
 
-RAPTOR is released under the MIT License. The toolbox assumes familiarity with MATLAB and basic optimal-control terminology; the documentation focuses on using the software rather than deriving the numerical methods.
+## Getting started
+
+Install RAPTOR and run the first example, then continue with the user guide.
+
+[Installation](getting-started/installation.md){ .md-button .md-button--primary }
+[User guide](user-guide/index.md){ .md-button }
+
+</section>

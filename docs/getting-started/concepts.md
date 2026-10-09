@@ -1,108 +1,146 @@
-# Concepts and conventions
+# Core Concepts
 
-## Continuous model and transcribed NLP
+This page describes the problem formulation used by RAPTOR and the
+conventions that all user functions follow.
 
-You define a continuous-time optimal-control problem. RAPTOR applies a pseudospectral transcription and sends the resulting finite-dimensional nonlinear program (NLP) to IPOPT, SNOPT, or WORHP.
+## Problem formulation
 
-The stages are deliberately separate:
+For a single phase, RAPTOR solves problems of the form
 
-- `raptor.api.v1.OptimalControlProblem` and its phases describe the continuous formulation.
-- `raptor.build(ocp)` checks and freezes that formulation into a `raptor.RAPTOR` solver object.
-- `problem.config` controls transcription, scaling, numerical derivatives, the NLP backend, and postprocessing.
-- `problem.solve()` returns solver information and phase-indexed trajectories.
+\[
+\begin{aligned}
+\min \quad & \Phi\big(t_0, x(t_0), t_f, x(t_f)\big) + \int_{t_0}^{t_f} L\big(t, x(t), u(t)\big)\, \mathrm{d}t \\
+\text{subject to} \quad & \dot{x}(t) = f\big(t, x(t), u(t)\big) \\
+& g_{\min} \le g\big(t, x(t), u(t)\big) \le g_{\max} \\
+& \psi_{\min} \le \psi\big(t_0, x(t_0), t_f, x(t_f)\big) \le \psi_{\max}
+\end{aligned}
+\]
 
-Changing `ocp` after `raptor.build` does not change the already built `problem`; rebuild whenever the continuous formulation changes.
+with lower and upper bounds on \(t_0\), \(t_f\), \(x\) and \(u\). Each term
+corresponds to a property of a phase:
+
+| Term | Meaning | RAPTOR property |
+| --- | --- | --- |
+| \(\Phi\) | endpoint (Mayer) cost | `phase.costs.mayer` |
+| \(L\) | running (Lagrange) cost | `phase.costs.lagrange` |
+| \(f\) | dynamics | `phase.dynamics` |
+| \(g\) | path constraints | `phase.constraints.path` |
+| \(\psi\) | boundary constraints | `phase.constraints.boundary` |
+| bounds | simple bounds on the variables | `phase.box`, `phase.boundaryConditions` |
+
+A problem can have several phases. Phases are connected by linkage
+constraints between the end of one phase and the start of the next. All
+functions can also depend on static parameters, either specific to one phase
+(local) or shared by all phases (global).
+
+## Workflow
+
+```mermaid
+flowchart LR
+  A["Define<br/><code>OptimalControlProblem</code>"] --> B["Build<br/><code>raptor.build</code>"]
+  B --> C["Configure<br/><code>problem.config</code>"]
+  C --> D["Solve<br/><code>problem.solve</code>"]
+```
+
+1. **Define** the problem with `raptor.api.v1.OptimalControlProblem` and its
+   phases.
+2. **Build** it with `raptor.build(ocp)`. RAPTOR checks the dimensions,
+   evaluates the functions on the initial guess, detects the sparsity of the
+   derivatives, and returns a solver object.
+3. **Configure** the numerical settings in `problem.config`.
+4. **Solve** with `problem.solve()`.
+
+!!! note "Rebuild after changing the problem"
+    Changes made to `ocp` after `raptor.build` do not affect the built
+    `problem`. Call `raptor.build` again after changing the problem
+    definition. Changes to `problem.config` do not require a rebuild.
 
 ## Phases
 
-A phase is one time interval with a fixed number and ordering of states, controls, and local parameters. Use multiple phases when a known event changes the equations, dimensions, active constraints, or operating regime. Link phases explicitly with continuity or a custom endpoint relation.
+A phase is a time interval with a fixed number of states, controls and local
+parameters. Use more than one phase when something changes at a known event,
+for example the dynamics, the number of variables, the active constraints or
+the coordinates.
 
-Phase names must be unique and valid MATLAB property names because RAPTOR uses them as fields in the returned solution:
+Phase names must be valid MATLAB identifiers, because they are used as field
+names in the solution (`sol.ascent`, `sol.coast`, ...).
+
+## Variables and data
+
+| Quantity | Time-varying | Scope | Field in `inputData` |
+| --- | :---: | --- | --- |
+| Time | yes | phase | `time` |
+| States | yes | phase | `states` |
+| Controls | yes | phase | `controls` |
+| Local parameters | no | one phase | `localParameters` |
+| Global parameters | no | all phases | `globalParameters` |
+| Auxiliary data | no, not optimized | problem | `auxdata` |
+
+Quantities that the optimizer can change must be states, controls or
+parameters. `auxdata` contains constants and data used by the functions;
+RAPTOR does not optimize it or differentiate with respect to it.
+
+## Array sizes
+
+Time-varying quantities have **one row per component and one column per time
+instant**. For `nx` states, `nu` controls and `N` time instants:
+
+| | Size |
+| --- | --- |
+| `inputData.time` | `1 x N` |
+| `inputData.states` | `nx x N` |
+| `inputData.controls` | `nu x N` |
+| dynamics output | `nx x N` |
+| path constraint output with `ng` components | `ng x N` |
+| running cost output | `1 x N` |
+
+RAPTOR calls the functions both at single points and at many points at once.
+Use element-wise operators and explicit dimensions so that the code works for
+any `N`:
 
 ```matlab
-ascent = ocp.addPhase("ascent", 7, 4, 0);
-% Later: solution.ascent.discretized.states
+speed = sqrt(sum(inputData.states(4:6, :).^2, 1));   % 1-by-N
 ```
 
-## Variable families
+!!! tip "Writing vectorized functions"
+    [Vectorized Functions](vectorized-functions.md) shows how to write products, norms, dot
+    and cross products, matrix products, conditions and tables in this form,
+    with a complete example and a way to test your functions.
 
-| Quantity | Varies with time | Scope | Typical access in a path function |
-| --- | --- | --- | --- |
-| Time | yes | phase | `inputData.time` |
-| States | yes | phase | `inputData.states` |
-| Controls | yes | phase | `inputData.controls` |
-| Local parameters | no | one phase | `inputData.localParameters` |
-| Global parameters | no | all phases | `inputData.globalParameters` |
-| Auxiliary data | no, never optimized | problem | `inputData.auxdata` |
+## Path and boundary functions
 
-Optimization variables belong in a state, control, local parameter, or global parameter—not in `auxdata`. RAPTOR treats auxiliary data as constant and does not differentiate with respect to it.
+=== "Path functions"
 
-Define parameter guesses and bounds as vectors with one entry per declared parameter. Current transcribed callback evaluations expose local and global parameters as row vectors; use linear indexing unless your function deliberately depends on orientation.
+    Dynamics, running costs, path constraints and differential constraints
+    are evaluated along the trajectory. Available fields:
 
-## Component-by-time array convention
+    ```text
+    time   states   controls   localParameters   globalParameters   auxdata
+    ```
 
-Time-dependent quantities use one row per component and one column per evaluation time. If a phase has `nx` states, `nu` controls, and a path function is evaluated at `N` points:
+=== "Boundary functions"
 
-- `inputData.time` is `1 x N`;
-- `inputData.states` is `nx x N`;
-- `inputData.controls` is `nu x N`;
-- dynamics must return `nx x N`;
-- a path constraint with `ng` components must return `ng x N`;
-- a scalar Lagrange term must return `1 x N`.
+    Endpoint costs, boundary constraints and linkages are evaluated at the
+    endpoints of the phase. Available fields:
 
-Use element-wise operators in path functions:
+    ```text
+    initialTime     finalTime
+    initialStates   finalStates
+    initialControls finalControls
+    localParameters globalParameters auxdata
+    upstreamParameters   (linkages only)
+    ```
 
-```matlab
-speed = sqrt(sum(inputData.states(4:6, :).^2, 1));
-```
+All functions take exactly one input, `inputData`, and return a numeric
+array.
 
-Avoid code that happens to work only for `N == 1`. RAPTOR evaluates functions both on individual points and batches of points during building, differentiation, transcription, and postprocessing.
+## Checking a solution
 
-## Path and boundary callbacks
+| Check | Meaning | Where to look |
+| --- | --- | --- |
+| **Build** | The problem definition passed RAPTOR's checks. | `raptor.build` returns without error |
+| **Solve** | The NLP solver reports success. | `sol.exitStatus`, solver output |
+| **Validation** | Integrating the dynamics with the optimal controls reproduces the solution. | `sol.<phase>.propagated.errors` |
 
-Path callbacks—dynamics, Lagrange terms, path constraints, and differential constraints—use `time`, `states`, `controls`, `localParameters`, `globalParameters`, and `auxdata`.
-
-Boundary callbacks—Mayer terms, boundary constraints, and linkage constraints—use endpoint fields:
-
-```text
-initialTime       finalTime
-initialStates     finalStates
-initialControls   finalControls
-localParameters   globalParameters
-upstreamParameters (linkages)
-auxdata
-```
-
-For a custom linkage, `final*` describes the upstream/first phase and `initial*` describes the downstream/second phase. `upstreamParameters` belongs to the first phase, while `localParameters` belongs to the second phase.
-
-## Bounds, fixed values, and general constraints
-
-These mechanisms are related but not interchangeable:
-
-- `phase.box.lower` and `.upper` bound variables throughout their domain.
-- `phase.boundaryConditions.initial` and `.final` fix selected endpoint values.
-- `phase.constraints.boundary` represents general endpoint equations and inequalities.
-
-Unspecified fixed boundary components remain `NaN` internally and are free. Unspecified box bounds default to `-Inf` and `Inf`.
-
-## Names and indexing
-
-RAPTOR preserves the component order declared by your model. Keep a short table in the model script or metadata, and use the same order in:
-
-- functions;
-- bounds and boundary values;
-- initial guesses;
-- Jacobian patterns or values;
-- solution postprocessing.
-
-Named constraint groups become dynamic properties and solution fields. Use concise valid MATLAB identifiers such as `dynamicPressure`, not labels containing spaces or punctuation.
-
-## Build success, solver success, and validation
-
-These are three different claims:
-
-1. **Build success** means the formulation passed RAPTOR's construction and dimension checks.
-2. **Solver success** means the selected NLP adapter recognized a successful termination.
-3. **Validation success** means independent numerical propagation agrees sufficiently with the collocation solution for your application.
-
-Accept a result only after checking all three, plus the original physical constraints and units.
+Accept a solution only when all three checks pass and the result is
+physically reasonable.
