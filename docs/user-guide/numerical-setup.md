@@ -62,12 +62,6 @@ Write norms as `sqrt(sum(v.^2, 1))` instead (other replacements are
 listed in [Vectorized Functions](../getting-started/vectorized-functions.md#complex-step-differentiation)).
 If in doubt, compare the results with central differences.
 
-### Dual-step differences
-
-`"DualStepDifferences"` is also available. Use it only if your functions
-support dual-number arithmetic. The examples use central and complex-step
-differences.
-
 ??? info "Sparsity detection and manual derivatives"
     During the build, RAPTOR finds which inputs each function depends on by
     setting the inputs to `NaN`. If a function does not accept `NaN`, RAPTOR

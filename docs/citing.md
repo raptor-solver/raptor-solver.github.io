@@ -1,10 +1,7 @@
 # Citing RAPTOR
 
-If you use RAPTOR in published work, please cite the paper describing it.
-
-!!! info "Reference not final"
-    The paper will be available on arXiv soon. This page will be updated
-    with the full reference.
+The paper describing RAPTOR is available as an arXiv preprint. If you use
+RAPTOR in published work, please cite it using the reference below.
 
 ```bibtex
 @misc{raptor,

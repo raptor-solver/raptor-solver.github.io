@@ -69,7 +69,7 @@ To run all the examples:
 
 ```matlab
 cd tests
-run_all_examples();
+runTests();
 ```
 
 Some examples may need an external solver or licence. If an example fails,

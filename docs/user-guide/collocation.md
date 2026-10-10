@@ -14,8 +14,8 @@ phase.collocation.nNodes      = 40;
 
 | Property | Options | Default |
 | --- | --- | --- |
-| `interpolant` | `"Lagrange"`, `"Birkhoff_a"`, `"Birkhoff_b"` | `"Lagrange"` |
-| `polynomials` | `"Legendre"`, `"Chebyshev"` | `"Legendre"` |
+| `interpolant` | `"Lagrange"`, `"Birkhoff_a"` | `"Lagrange"` |
+| `polynomials` | `"Legendre"` | `"Legendre"` |
 | `nodes` | `"Gauss-Radau"`, `"flipped-Gauss-Radau"`, `"Gauss-Lobatto"` | `"Gauss-Lobatto"` |
 | `nNodes` | integer, or array of integers for an [hp grid](#hp-collocation) | `10` |
 | `interpolationMethod` | any MATLAB `interp1` method, e.g. `"linear"`, `"pchip"` | `"linear"` |

@@ -196,7 +196,7 @@ constraints.
 :material-chart-bell-curve-cumulative: Pseudospectral methods
 { .rp-card__title }
 
-Lagrange and Birkhoff formulations with Legendre or Chebyshev polynomials,
+Lagrange and Birkhoff formulations with Legendre polynomials,
 Gauss-Radau or Gauss-Lobatto nodes, on a single segment or an hp grid.
 </div>
 
@@ -204,7 +204,7 @@ Gauss-Radau or Gauss-Lobatto nodes, on a single segment or an hp grid.
 :material-matrix: Numerical derivatives
 { .rp-card__title }
 
-Central, complex-step or dual-step differences. Sparsity patterns are
+Central or complex-step differences. Sparsity patterns are
 detected automatically.
 </div>
 
@@ -302,9 +302,8 @@ example introduces a few new features.
 
 ## Citing RAPTOR
 
-If you use RAPTOR in published work, please cite the paper describing it.
-The paper will be available on arXiv soon; the reference will be updated
-then.
+The paper describing RAPTOR is available as an arXiv preprint. If you use
+RAPTOR in published work, please cite it using the reference below.
 
 [Citation details :material-arrow-right:](citing.md){ .md-button }
 </div>
