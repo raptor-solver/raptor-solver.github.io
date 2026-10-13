@@ -321,6 +321,15 @@ RAPTOR in published work, please cite it using the reference below.
 </div>
 </section>
 
+<section class="rp-section" markdown>
+<span class="rp-eyebrow">Acknowledgements</span>
+
+## Acknowledgements
+
+Funded by the European Union ([ERC, STARGATE, 101169959](https://cordis.europa.eu/project/id/101169959)). Views and opinions expressed are however those of the author(s) only and do not necessarily reflect those of the European Union or the European Research Council. Neither the European Union nor the granting authority can be held responsible for them.
+
+</section>
+
 <section class="rp-band rp-cta" markdown>
 
 ## Getting started
