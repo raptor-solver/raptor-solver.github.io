@@ -44,8 +44,8 @@ check that the included IPOPT solver works on your system.
 </div>
 
 !!! note
-    Run `RAPTOR_init` from the repository root folder. It builds the paths
-    from the current folder.
+    `RAPTOR_init` can be called from any folder. It builds the paths from
+    the location of the `RAPTOR_init.m` file.
 
 ## Verify the installation
 
