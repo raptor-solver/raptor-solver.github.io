@@ -1,6 +1,6 @@
 # Citing RAPTOR
 
-The paper describing RAPTOR is available as an arXiv preprint. If you use
+The paper describing RAPTOR is available as an [arXiv preprint](https://arxiv.org/abs/2610.17842). If you use
 RAPTOR in published work, please cite it using the reference below.
 
 ```bibtex
@@ -8,8 +8,10 @@ RAPTOR in published work, please cite it using the reference below.
   author        = {Minnozzi, Riccardo and Sagliano, Marco},
   title         = {Theoretical and Computational Advances in Birkhoff Pseudospectral Transcription for Aerospace Optimal Control},
   year          = {2026},
-  eprint        = {XXXX.XXXXX},
-  archivePrefix = {arXiv}
+  eprint        = {2610.17842},
+  archivePrefix = {arXiv},
+  primaryClass  = {math.OC},
+  url           = {https://arxiv.org/abs/2610.17842}
 }
 ```
 
